@@ -15,7 +15,9 @@ import {
   getAllCollisions,
   compactType,
   noop,
-  fastRGLPropsEqual
+  fastRGLPropsEqual,
+  getMaxRows,
+  getAllIntersections,
 } from "./utils";
 
 import { calcXY } from "./calculateUtils";
@@ -266,7 +268,7 @@ export default class ReactGridLayout extends React.Component<Props, State> {
   onDrag(i: string, x: number, y: number, { e, node }: GridDragEvent) {
     const { oldDragItem } = this.state;
     let { layout } = this.state;
-    const { cols } = this.props;
+    const { cols, maxRows } = this.props;
     var l = getLayoutItem(layout, i);
     if (!l) return;
 
@@ -290,7 +292,8 @@ export default class ReactGridLayout extends React.Component<Props, State> {
       isUserAction,
       this.props.preventCollision,
       compactType(this.props),
-      cols
+      cols,
+      maxRows
     );
 
     this.props.onDrag(layout, oldDragItem, l, placeholder, e, node);
@@ -314,7 +317,7 @@ export default class ReactGridLayout extends React.Component<Props, State> {
 
     const { oldDragItem } = this.state;
     let { layout } = this.state;
-    const { cols, preventCollision } = this.props;
+    const { cols, preventCollision, maxRows } = this.props;
     const l = getLayoutItem(layout, i);
     if (!l) return;
 
@@ -328,7 +331,8 @@ export default class ReactGridLayout extends React.Component<Props, State> {
       isUserAction,
       preventCollision,
       compactType(this.props),
-      cols
+      cols,
+      maxRows
     );
 
     this.props.onDragStop(layout, oldDragItem, l, null, e, node);
@@ -583,7 +587,8 @@ export default class ReactGridLayout extends React.Component<Props, State> {
       rowHeight,
       maxRows,
       width,
-      containerPadding
+      containerPadding,
+      preventCollision
     } = this.props;
     const { layout } = this.state;
     // This is relative to the DOM element that this event fired for.
@@ -607,6 +612,20 @@ export default class ReactGridLayout extends React.Component<Props, State> {
         droppingItem.w,
         droppingItem.h
       );
+      const { x, y } = calculatedPosition;
+      const collisions = getAllCollisions(layout, { x, y });
+
+      if (collisions.length) {
+        // Fixed: The dropping item will collision with grid item when preventCollision is true.
+        if (preventCollision) return false;
+
+        if (maxRows > 0 && maxRows !== Infinity) {
+          const intersections = getAllIntersections(layout, { x, y });
+          const _maxRows = getMaxRows(intersections) + droppingItem.h;
+          // If specify a maxRow, it can push a grid item beyond the barrier
+          if (maxRows < _maxRows) return false;
+        }
+      }
 
       this.setState({
         droppingDOMNode: <div key={droppingItem.i} />,
@@ -615,8 +634,8 @@ export default class ReactGridLayout extends React.Component<Props, State> {
           ...layout,
           {
             ...droppingItem,
-            x: calculatedPosition.x,
-            y: calculatedPosition.y,
+            x,
+            y,
             static: false,
             isDraggable: true
           }
