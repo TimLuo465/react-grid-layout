@@ -15,7 +15,7 @@ export default class DragFromOutsideLayout extends React.Component {
     currentBreakpoint: "lg",
     compactType: "vertical",
     mounted: false,
-    layouts: { lg: generateLayout() }
+    layouts: { lg: [] }
   };
 
   componentDidMount() {
@@ -25,7 +25,7 @@ export default class DragFromOutsideLayout extends React.Component {
   generateDOM() {
     return _.map(this.state.layouts.lg, function(l, i) {
       return (
-        <div key={i} className={l.static ? "static" : ""}>
+        <div key={i} className={l.static ? "static" : ""} data-grid={l}>
           {l.static ? (
             <span
               className="text"
@@ -64,12 +64,14 @@ export default class DragFromOutsideLayout extends React.Component {
 
   onNewLayout = () => {
     this.setState({
-      layouts: { lg: generateLayout() }
+      layouts: { lg: [] }
     });
   };
 
   onDrop = elemParams => {
-    alert(`Element parameters:\n${JSON.stringify(elemParams, ['x', 'y', 'w', 'h'], 2)}`);
+    console.log(elemParams);
+    this.state.layouts.lg.push(elemParams);
+    this.setState({ layouts: this.state.layouts });
   };
 
   render() {
@@ -101,6 +103,7 @@ export default class DragFromOutsideLayout extends React.Component {
         </div>
         <ResponsiveReactGridLayout
           {...this.props}
+          style={{ minHeight: 200 }}
           layouts={this.state.layouts}
           onBreakpointChange={this.onBreakpointChange}
           onLayoutChange={this.onLayoutChange}
@@ -111,28 +114,17 @@ export default class DragFromOutsideLayout extends React.Component {
           // and set `measureBeforeMount={true}`.
           useCSSTransforms={this.state.mounted}
           compactType={this.state.compactType}
-          preventCollision={!this.state.compactType}
+          preventCollision={true}
+          autoSize={false}
+          isResizable={false}
           isDroppable={true}
+          maxRows={5}
         >
           {this.generateDOM()}
         </ResponsiveReactGridLayout>
       </div>
     );
   }
-}
-
-function generateLayout() {
-  return _.map(_.range(0, 25), function(item, i) {
-    var y = Math.ceil(Math.random() * 4) + 1;
-    return {
-      x: Math.round(Math.random() * 5) * 2,
-      y: Math.floor(i / 6) * y,
-      w: 2,
-      h: y,
-      i: i.toString(),
-      static: Math.random() < 0.05
-    };
-  });
 }
 
 if (process.env.STATIC_EXAMPLES === true) {

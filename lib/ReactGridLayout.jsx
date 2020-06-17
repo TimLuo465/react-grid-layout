@@ -17,7 +17,7 @@ import {
   noop,
   fastRGLPropsEqual,
   getMaxRows,
-  getAllIntersections,
+  getAllIntersections
 } from "./utils";
 
 import { calcXY } from "./calculateUtils";
@@ -613,14 +613,15 @@ export default class ReactGridLayout extends React.Component<Props, State> {
         droppingItem.h
       );
       const { x, y } = calculatedPosition;
-      const collisions = getAllCollisions(layout, { x, y });
+      const layoutItem = { ...droppingItem, x, y };
+      const collisions = getAllCollisions(layout, layoutItem);
 
       if (collisions.length) {
         // Fixed: The dropping item will collision with grid item when preventCollision is true.
         if (preventCollision) return false;
 
         if (maxRows > 0 && maxRows !== Infinity) {
-          const intersections = getAllIntersections(layout, { x, y });
+          const intersections = getAllIntersections(layout, layoutItem);
           const _maxRows = getMaxRows(intersections) + droppingItem.h;
           // If specify a maxRow, it can push a grid item beyond the barrier
           if (maxRows < _maxRows) return false;

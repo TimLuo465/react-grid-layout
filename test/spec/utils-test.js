@@ -16,7 +16,6 @@ import {
 } from "../../lib/calculateUtils";
 import isEqual from "lodash.isequal";
 
-
 describe("bottom", () => {
   it("Handles an empty layout as input", () => {
     expect(bottom([])).toEqual(0);
@@ -94,7 +93,8 @@ describe("moveElement", () => {
     isUserAction,
     preventCollision,
     compactType,
-    cols
+    cols,
+    maxRows
   ) {
     return compact(
       moveElement(
@@ -105,7 +105,8 @@ describe("moveElement", () => {
         isUserAction,
         preventCollision,
         compactType,
-        cols
+        cols,
+        maxRows
       ),
       compactType,
       cols
@@ -127,7 +128,8 @@ describe("moveElement", () => {
         true,
         true, // isUserAction, preventCollision
         null,
-        2 // compactType, cols
+        2, // compactType, cols
+        12
       )
     ).toEqual([
       { i: "1", x: 0, y: 1, w: 1, h: 1, moved: false },
@@ -150,7 +152,8 @@ describe("moveElement", () => {
         true,
         false, // isUserAction, preventCollision
         "vertical",
-        2 // compactType, cols
+        2, // compactType, cols
+        12
       )
     ).toEqual([
       { i: "1", x: 1, y: 0, w: 1, h: 1, moved: true },
@@ -176,7 +179,8 @@ describe("moveElement", () => {
         true,
         false, // isUserAction, preventCollision
         "vertical",
-        10 // compactType, cols
+        10, // compactType, cols
+        12
       )
     ).toEqual([
       expect.objectContaining({ x: 0, y: 1, w: 1, h: 10, i: "A" }),
@@ -203,7 +207,8 @@ describe("moveElement", () => {
         true,
         false, // isUserAction, preventCollision
         "vertical",
-        10 // compactType, cols
+        10, // compactType, cols
+        15
       )
     ).toEqual([
       expect.objectContaining({ x: 0, y: 2, w: 1, h: 10, i: "A" }),
@@ -230,7 +235,8 @@ describe("moveElement", () => {
         true,
         false, // isUserAction, preventCollision
         "vertical",
-        2 // compactType, cols
+        2, // compactType, cols
+        12
       )
     ).toEqual([
       { x: 1, y: 0, w: 1, h: 1, i: "A", moved: true },
@@ -257,7 +263,8 @@ describe("moveElement", () => {
         true,
         false, // isUserAction, preventCollision
         "horizontal",
-        10 // compactType, cols
+        10, // compactType, cols
+        12
       )
     ).toEqual([
       { y: 0, x: 2, h: 1, w: 10, moved: true, i: "A" },
@@ -287,7 +294,8 @@ describe("moveElement", () => {
         true,
         false, // isUserAction, preventCollision
         "vertical",
-        4 // compactType, cols
+        4, // compactType, cols
+        12
       )
     ).toEqual([
       expect.objectContaining({ x: 0, y: 1, w: 2, h: 1, i: "A" }),
@@ -319,7 +327,8 @@ describe("moveElement", () => {
         true,
         false, // isUserAction, preventCollision
         "vertical",
-        4 // compactType, cols
+        4, // compactType, cols
+        12
       )
     ).toEqual([
       expect.objectContaining({ x: 0, y: 2, w: 2, h: 1, i: "A" }),
