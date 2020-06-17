@@ -101,7 +101,7 @@ RGL is React-only and does not require jQuery.
 Install the React-Grid-Layout [package](https://www.npmjs.org/package/react-grid-layout) package using [npm](https://www.npmjs.com/):
 
 ```bash
-npm install react-grid-layout
+npm install @timluo465/react-grid-layout
 ```
 
 Include the following stylesheets in your application:
