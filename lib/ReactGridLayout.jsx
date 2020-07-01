@@ -113,7 +113,8 @@ export default class ReactGridLayout extends React.Component<Props, State> {
     onResizeStart: noop,
     onResize: noop,
     onResizeStop: noop,
-    onDrop: noop
+    onDrop: noop,
+    onMouseDown: noop
   };
 
   state: State = {
@@ -513,7 +514,8 @@ export default class ReactGridLayout extends React.Component<Props, State> {
       useCSSTransforms,
       transformScale,
       draggableCancel,
-      draggableHandle
+      draggableHandle,
+      onMouseDown
     } = this.props;
     const { mounted, droppingPosition } = this.state;
 
@@ -545,6 +547,7 @@ export default class ReactGridLayout extends React.Component<Props, State> {
         onResizeStart={this.onResizeStart}
         onResize={this.onResize}
         onResizeStop={this.onResizeStop}
+        onMouseDown={onMouseDown}
         isDraggable={draggable}
         isResizable={resizable}
         useCSSTransforms={useCSSTransforms && mounted}

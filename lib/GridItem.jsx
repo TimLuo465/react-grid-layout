@@ -71,7 +71,8 @@ type Props = {
   onDragStop?: GridItemCallback<GridDragEvent>,
   onResize?: GridItemCallback<GridResizeEvent>,
   onResizeStart?: GridItemCallback<GridResizeEvent>,
-  onResizeStop?: GridItemCallback<GridResizeEvent>
+  onResizeStop?: GridItemCallback<GridResizeEvent>,
+  onMouseDown?: (i: string) => void
 };
 
 /**
@@ -311,6 +312,7 @@ export default class GridItem extends React.Component<Props, State> {
         onDrag={this.onDrag}
         onStop={this.onDragStop}
         handle={this.props.handle}
+        onMouseDown={this.onMouseDown}
         cancel={
           ".react-resizable-handle" +
           (this.props.cancel ? "," + this.props.cancel : "")
@@ -555,6 +557,10 @@ export default class GridItem extends React.Component<Props, State> {
 
     handler.call(this, i, w, h, { e, node, size });
   }
+
+  onMouseDown = (e: Event) => {
+    return this.props.onMouseDown && this.props.onMouseDown(this.props.i);
+  };
 
   render(): ReactNode {
     const {
