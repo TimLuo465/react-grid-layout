@@ -52,6 +52,8 @@ RGL is React-only and does not require jQuery.
 1. [Error Case](https://strml.github.io/react-grid-layout/examples/13-error-case.html)
 1. [Toolbox](https://strml.github.io/react-grid-layout/examples/14-toolbox.html)
 1. [Drag From Outside](https://strml.github.io/react-grid-layout/examples/15-drag-from-outside.html)
+1. [Bounded Layout](https://strml.github.io/react-grid-layout/examples/16-bounded.html)
+1. [Resizable Handles](https://strml.github.io/react-grid-layout/examples/17-resizable-handles.html)
 
 #### Projects Using React-Grid-Layout
 
@@ -69,6 +71,7 @@ RGL is React-only and does not require jQuery.
 - [Monday](https://support.monday.com/hc/en-us/articles/360002187819-What-are-the-Dashboards-)
 - [Quadency](https://quadency.com/)
 - [Hakkiri](https://www.hakkiri.io)
+- [Ubidots](https://help.ubidots.com/en/articles/2400308-create-dashboards-and-widgets)
 
 *Know of others? Create a PR to let me know!*
 
@@ -86,7 +89,7 @@ RGL is React-only and does not require jQuery.
 * Responsive breakpoints
 * Separate layouts per responsive breakpoint
 * Grid Items placed using CSS Transforms
-* Performance: [on](http://i.imgur.com/FTogpLp.jpg) / [off](http://i.imgur.com/gOveMm8.jpg), note paint (green) as % of time
+  * Performance with CSS Transforms: [on](http://i.imgur.com/FTogpLp.jpg) / [off](http://i.imgur.com/gOveMm8.jpg), note paint (green) as % of time
 
 |Version         | Compatibility    |
 |----------------|------------------|
@@ -197,8 +200,8 @@ If the largest is provided, RGL will attempt to interpolate the rest.
 You will also need to provide a `width`, when using `<ResponsiveReactGridLayout>` it is suggested you use the HOC
 `WidthProvider` as per the instructions below.
 
-For the time being, it is not possible to supply responsive mappings via the `data-grid` property on individual
-items, but that is coming soon.
+It is possible to supply default mappings via the `data-grid` property on individual
+items, so that they would be taken into account within layout interpolation.
 
 ### Providing Grid Width
 
@@ -304,6 +307,7 @@ droppingItem?: { i: string, w: number, h: number }
 //
 isDraggable: ?boolean = true,
 isResizable: ?boolean = true,
+isBounded: ?boolean = false,
 // Uses CSS3 translate() instead of position top/left.
 // This makes about 6x faster paint performance
 useCSSTransforms: ?boolean = true,
@@ -326,6 +330,19 @@ preventCollision: ?boolean = false;
 // onDragStart attribute is required for Firefox for a dragging initialization
 // @see https://bugzilla.mozilla.org/show_bug.cgi?id=568313
 isDroppable: ?boolean = false
+// Defines which resize handles should be rendered
+// Allows for any combination of:
+// 's' - South handle (bottom-center)
+// 'w' - West handle (left-center)
+// 'e' - East handle (right-center)
+// 'n' - North handle (top-center)
+// 'sw' - Southwest handle (bottom-left)
+// 'nw' - Northwest handle (top-left)
+// 'se' - Southeast handle (bottom-right)
+// 'ne' - Northeast handle (top-right)
+resizeHandles: ?Array<'s' | 'w' | 'e' | 'n' | 'sw' | 'nw' | 'se' | 'ne'> = ['se']
+// Custom component for resize handles
+resizeHandle?: ReactElement<any> | ((resizeHandleAxis: ResizeHandleAxis) => ReactElement<any>)
 
 //
 // Callbacks
@@ -354,11 +371,12 @@ onResizeStart: ItemCallback,
 onResize: ItemCallback,
 // Calls when resize is complete.
 onResizeStop: ItemCallback,
-// Calls when some element has been dropped
-onDrop: (elemParams: { x: number, y: number, w: number, h: number, e: Event }) => void,
+// Calls when an element has been dropped into the grid from outside.
+onDrop: (layout: Layout, item: ?LayoutItem, e: Event) => void
 
-// Ref for getting a reference for the wrapping div.
-innerRef: ?React.Ref
+// Ref for getting a reference for the grid's wrapping div.
+// You can use this instead of a regular ref and the deprecated `ReactDOM.findDOMNode()`` function.
+innerRef: ?React.Ref<"div">
 ```
 
 ### Responsive Grid Layout Props
@@ -443,7 +461,12 @@ will be draggable, even if the item is marked `static: true`.
   // If false, will not be draggable. Overrides `static`.
   isDraggable: ?boolean = true,
   // If false, will not be resizable. Overrides `static`.
-  isResizable: ?boolean = true
+  isResizable: ?boolean = true,
+  // By default, a handle is only shown on the bottom-right (southeast) corner.
+  // Note that resizing from the top or left is generally not intuitive.
+  resizeHandles?: ?Array<'s' | 'w' | 'e' | 'n' | 'sw' | 'nw' | 'se' | 'ne'> = ['se']
+  // If true and draggable, item will be moved only within grid.
+  isBounded: ?boolean = false
 }
 ```
 

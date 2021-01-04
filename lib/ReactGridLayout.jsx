@@ -93,6 +93,7 @@ export default class ReactGridLayout extends React.Component<Props, State> {
     maxRows: Infinity, // infinite vertical growth
     layout: [],
     margin: [10, 10],
+    isBounded: false,
     isDraggable: true,
     isResizable: true,
     isDroppable: false,
@@ -106,6 +107,7 @@ export default class ReactGridLayout extends React.Component<Props, State> {
       h: 1,
       w: 1
     },
+    resizeHandles: ["se"],
     onLayoutChange: noop,
     onDragStart: noop,
     onDrag: noop,
@@ -206,6 +208,7 @@ export default class ReactGridLayout extends React.Component<Props, State> {
       this.props.children !== nextProps.children ||
       !fastRGLPropsEqual(this.props, nextProps, isEqual) ||
       this.state.activeDrag !== nextState.activeDrag ||
+      this.state.mounted !== nextState.mounted ||
       this.state.droppingPosition !== nextState.droppingPosition
     );
   }
@@ -482,6 +485,7 @@ export default class ReactGridLayout extends React.Component<Props, State> {
         rowHeight={rowHeight}
         isDraggable={false}
         isResizable={false}
+        isBounded={false}
         useCSSTransforms={useCSSTransforms}
         transformScale={transformScale}
       >
@@ -511,11 +515,14 @@ export default class ReactGridLayout extends React.Component<Props, State> {
       maxRows,
       isDraggable,
       isResizable,
+      isBounded,
       useCSSTransforms,
       transformScale,
       draggableCancel,
       draggableHandle,
-      onMouseDown
+      onMouseDown,
+      resizeHandles,
+      resizeHandle
     } = this.props;
     const { mounted, droppingPosition } = this.state;
 
@@ -530,6 +537,10 @@ export default class ReactGridLayout extends React.Component<Props, State> {
       typeof l.isResizable === "boolean"
         ? l.isResizable
         : !l.static && isResizable;
+    const resizeHandlesOptions = l.resizeHandles || resizeHandles;
+
+    // isBounded set on child if set on parent, and child is not explicitly false
+    const bounded = draggable && isBounded && l.isBounded !== false;
 
     return (
       <GridItem
@@ -550,6 +561,7 @@ export default class ReactGridLayout extends React.Component<Props, State> {
         onMouseDown={onMouseDown}
         isDraggable={draggable}
         isResizable={resizable}
+        isBounded={bounded}
         useCSSTransforms={useCSSTransforms && mounted}
         usePercentages={!mounted}
         transformScale={transformScale}
@@ -564,6 +576,8 @@ export default class ReactGridLayout extends React.Component<Props, State> {
         maxW={l.maxW}
         static={l.static}
         droppingPosition={isDroppingItem ? droppingPosition : undefined}
+        resizeHandles={resizeHandlesOptions}
+        resizeHandle={resizeHandle}
       >
         {child}
       </GridItem>
@@ -578,8 +592,10 @@ export default class ReactGridLayout extends React.Component<Props, State> {
     // FIXME remove this hack
     if (
       isFirefox &&
-      e.nativeEvent.target.className.indexOf(layoutClassName) === -1
+      !e.nativeEvent.target.classList.contains(layoutClassName)
     ) {
+      // without this Firefox will not allow drop if currently over droppingItem
+      e.preventDefault();
       return false;
     }
 
@@ -695,14 +711,14 @@ export default class ReactGridLayout extends React.Component<Props, State> {
   onDrop = (e: Event) => {
     const { droppingItem } = this.props;
     const { layout } = this.state;
-    const { x, y, w, h } = layout.find(l => l.i === droppingItem.i) || {};
+    const item = layout.find(l => l.i === droppingItem.i);
 
-    // reset gragEnter counter on drop
+    // reset dragEnter counter on drop
     this.dragEnterCounter = 0;
 
     this.removeDroppingPlaceholder();
 
-    this.props.onDrop({ x, y, w, h, e });
+    this.props.onDrop(layout, item, e);
   };
 
   render() {

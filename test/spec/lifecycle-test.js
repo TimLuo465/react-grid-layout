@@ -11,7 +11,7 @@ import DroppableLayout from "../examples/15-drag-from-outside";
 import deepFreeze from "../util/deepFreeze";
 import { mount } from "enzyme";
 
-describe("Lifecycle tests", function() {
+describe("Lifecycle tests", function () {
   // Example layouts use randomness
   let randIdx = 0;
   beforeAll(() => {
@@ -30,15 +30,15 @@ describe("Lifecycle tests", function() {
     global.Math.random.mockRestore();
   });
 
-  describe("<ReactGridLayout>", function() {
-    it("Basic Render", async function() {
+  describe("<ReactGridLayout>", function () {
+    it("Basic Render", async function () {
       const wrapper = mount(<BasicLayout />);
       expect(wrapper).toMatchSnapshot();
     });
 
-    describe("Droppability", function() {
-      it("Updates when an item is dropped in", function() {
-        const wrapper = mount(<DroppableLayout />);
+    describe("Droppability", function () {
+      it("Updates when an item is dropped in", function () {
+        const wrapper = mount(<DroppableLayout containerPadding={[0, 0]} />);
         const gridLayout = wrapper.find("ReactGridLayout");
         expect(gridLayout).toHaveLength(1);
 
@@ -115,13 +115,13 @@ describe("Lifecycle tests", function() {
     });
   });
 
-  describe("<ResponsiveReactGridLayout>", function() {
-    it("Basic Render", async function() {
+  describe("<ResponsiveReactGridLayout>", function () {
+    it("Basic Render", async function () {
       const wrapper = mount(<ShowcaseLayout />);
       expect(wrapper).toMatchSnapshot();
     });
 
-    it("Does not modify layout on movement", async function() {
+    it("Does not modify layout on movement", async function () {
       const layouts = {
         lg: [
           ..._.times(3, i => ({
